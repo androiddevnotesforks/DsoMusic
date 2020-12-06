@@ -5,6 +5,7 @@ import com.dirror.music.music.compat.CompatSearchData
 import com.dirror.music.music.compat.compatSearchDataToStandardPlaylistData
 import com.dirror.music.music.standard.data.StandardSongData
 import com.dirror.music.util.MagicHttp
+import com.dirror.music.util.loge
 import com.dirror.music.util.toast
 import com.google.gson.Gson
 import org.jetbrains.annotations.TestOnly
@@ -14,12 +15,15 @@ import org.jetbrains.annotations.TestOnly
  */
 object Playlist {
 
-    private const val SPLIT_PLAYLIST_NUMBER = 200 // 切割歌单，每 200 首
+    private const val SPLIT_PLAYLIST_NUMBER = 500 // 切割歌单，每 200 首
     private const val CHEATING_CODE = -460 // Cheating 错误
 
     private const val PLAYLIST_URL = "${API_MUSIC_ELEUU}/playlist/detail?id=" // 获取歌单链接
-    private const val SONG_DETAIL_URL = "https://music.163.com/api/song/detail" // 歌曲详情
+
+    // private const val SONG_DETAIL_URL = "https://music.163.com/api/song/detail" // 歌曲详情
     // private const val SONG_DETAIL_URL = "${API_MUSIC_ELEUU}/song/detail" // 歌曲详情
+    private const val SONG_DETAIL_URL = "https://autumnfish.cn/song/detail" // 歌曲详情
+
 
     /**
      * 传入歌单 [playlistId] id
@@ -39,12 +43,23 @@ object Playlist {
             // 每 200 首请求一次
             val allSongData = ArrayList<StandardSongData>()
             averageAssignFixLength(trackIds, SPLIT_PLAYLIST_NUMBER).forEach { list ->
-                val json = Gson().toJson(list)
+                var json = Gson().toJson(list)
+
+                json = json.replace("[", "")
+                json = json.replace("]", "")
+
+                loge("json:${json}")
+
+
+
+
                 MagicHttp.OkHttpManager().post(SONG_DETAIL_URL, json) { response ->
                     // toast("服务器返回字符数：${response.length.toString()}")
                     val data = Gson().fromJson(response, CompatSearchData::class.java)
                     if (data.code == CHEATING_CODE) {
                         toast("-460 Cheating")
+                        // 发生了欺骗立刻返回
+                        success.invoke(allSongData)
                     } else {
                         compatSearchDataToStandardPlaylistData(data).forEach {
                             allSongData.add(it)

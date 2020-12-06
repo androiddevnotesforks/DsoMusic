@@ -1,8 +1,12 @@
 package com.dirror.music.ui.fragment
 
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.LinearLayoutManager
+import com.dirror.music.MyApplication
 import com.dirror.music.R
+import com.dirror.music.adapter.PlaylistRecommendAdapter
 import com.dirror.music.foyou.sentence.Sentence
+import com.dirror.music.music.netease.PlaylistRecommend
 import com.dirror.music.music.qq.QQMusic
 import com.dirror.music.ui.base.BaseFragment
 import com.dirror.music.util.AnimationUtil
@@ -27,11 +31,18 @@ class HomeFragment : BaseFragment() {
 
     override fun initView() {
         changeSentence()
+        refreshPlaylistRecommend()
     }
 
     override fun initListener() {
         includeFoyou.setOnClickListener {
             changeSentence()
+        }
+
+        includeFeedback.setOnClickListener {
+            activity?.let {
+                MyApplication.activityManager.startFeedbackActivity(it)
+            }
         }
     }
 
@@ -49,6 +60,18 @@ class HomeFragment : BaseFragment() {
                 AnimationUtil.fadeIn(tvSource, 1000, false)
             }
         }
+    }
+
+    private fun refreshPlaylistRecommend() {
+        PlaylistRecommend.getPlaylistRecommend({
+            runOnMainThread {
+                rvPlaylistRecommend.adapter = PlaylistRecommendAdapter(it)
+                rvPlaylistRecommend.layoutManager = LinearLayoutManager(context, LinearLayoutManager.HORIZONTAL, false)
+            }
+        }, {
+
+        })
+
     }
 
 }

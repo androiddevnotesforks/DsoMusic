@@ -1,3 +1,7 @@
+# 原仓库地址
+
+https://github.com/Moriafly/DsoMusic
+
 # Dso Music
 
 源码仅供学习，请勿传播软件安装包。
